@@ -1,5 +1,12 @@
 console.log('Index is connected');
 
+function removeActiveClass(){
+    const btns = document.getElementsByClassName("active");
+    for (const btn of btns){
+        btn.classList.remove('active');
+    }
+}
+
 // Button section
 function loadCategories() {
     fetch('https://openapi.programming-hero.com/api/phero-tube/categories')
@@ -12,7 +19,12 @@ const loadCaregoryVideos = (id) => {
     const url = `https://openapi.programming-hero.com/api/phero-tube/category/${id}`;
     fetch(url)
     .then(res => res.json())
-    .then(data => displayVideos(data.category));
+    .then(data => {
+        removeActiveClass();
+        const clickedBtn = document.getElementById(`btn-${id}`);
+        clickedBtn.classList.add('active');
+        displayVideos(data.category)
+    });
 }
 function displayCategories(categories) {
     const categoryContainer = document.getElementById('btn-container');
@@ -20,7 +32,7 @@ function displayCategories(categories) {
         const div = document.createElement('div');
         div.innerHTML =
             `
-        <button onclick="loadCaregoryVideos(${category.category_id})" class="btn btn-sm hover:bg-[#FF1F3D] hover:text-white">${category.category}</button>
+        <button id="btn-${category.category_id}" onclick="loadCaregoryVideos(${category.category_id})" class="btn btn-sm hover:bg-[#FF1F3D] hover:text-white">${category.category}</button>
         `;
         categoryContainer.appendChild(div);
     }
@@ -30,12 +42,25 @@ function displayCategories(categories) {
 const loadVideos = () => {
     fetch('https://openapi.programming-hero.com/api/phero-tube/videos')
         .then(res => res.json())
-        .then(data => displayVideos(data.videos));
+        .then(data => {
+            document.getElementById('btn-all').classList.add('active');
+            displayVideos(data.videos)
+        });
 }
 
 const displayVideos = (videos) => {
     const videoConatiner = document.getElementById('video-container');
     videoConatiner.innerHTML = "";
+    if(videos.length == 0){
+        videoConatiner.innerHTML =
+        `
+        <div class="flex flex-col justify-center items-center col-span-full py-20 gap-10">
+                <img src="src/Icon.png" alt="">
+                <h3 class="font-bold text-3xl">Oops!! Sorry, There is no content here</h3>
+        </div>
+        `
+    }
+
     console.log(videos);
     videos.forEach(video => {
         const div = document.createElement('div');
